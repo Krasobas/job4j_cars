@@ -22,7 +22,7 @@
 		<profile>
 			<id>test</id>
 			<properties>
-				<liquibase.config>classpath:/db/liquibase_test.properties</liquibase.config>
+				<liquibase.config>src/test/resources/db/liquibase_test.properties</liquibase.config>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -31,7 +31,7 @@
 		<profile>
 			<id>production</id>
 			<properties>
-				<liquibase.config>classpath:/db/liquibase.properties</liquibase.config>
+				<liquibase.config>src/main/resources/db/liquibase.properties</liquibase.config>
 			</properties>
 		</profile>
 	</profiles>
