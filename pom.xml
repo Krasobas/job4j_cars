@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>ru.job4j</groupId>
 	<artifactId>cars</artifactId>
@@ -22,7 +22,7 @@
 		<profile>
 			<id>test</id>
 			<properties>
-				<liquibase.config>src/test/resources/db/liquibase_test.properties</liquibase.config>
+				<liquibase.config>${project.basedir}/src/test/resources/db/liquibase_test.properties</liquibase.config>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -31,7 +31,7 @@
 		<profile>
 			<id>production</id>
 			<properties>
-				<liquibase.config>src/main/resources/db/liquibase.properties</liquibase.config>
+				<liquibase.config>${project.basedir}/src/main/resources/db/liquibase.properties</liquibase.config>
 			</properties>
 		</profile>
 	</profiles>
@@ -136,7 +136,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<phase>process-resources</phase>
+						<phase>process-test-classes</phase>
 						<goals>
 							<goal>clearCheckSums</goal>
 							<goal>update</goal>
