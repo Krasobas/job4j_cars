@@ -31,10 +31,10 @@ public class UserRepository {
         } catch (Exception e) {
             session.getTransaction().rollback();
             log.error(e.getMessage(), e);
-            return Optional.empty();
         } finally {
             session.close();
         }
+        return Optional.empty();
     }
 
     /**
@@ -92,8 +92,8 @@ public class UserRepository {
                     .list();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     /**
@@ -105,12 +105,11 @@ public class UserRepository {
             Query<User> query = session.createQuery(
                             "FROM User WHERE id = :fId", User.class)
                     .setParameter("fId", userId);
-            User user = query.uniqueResult();
-            return Optional.ofNullable(user);
+            return query.uniqueResultOptional();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**
@@ -126,8 +125,8 @@ public class UserRepository {
                     .list();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     /**
@@ -140,11 +139,10 @@ public class UserRepository {
             Query<User> query = session.createQuery(
                             "FROM User WHERE login = :fLogin", User.class)
                     .setParameter("fLogin", login);
-            User user = query.uniqueResult();
-            return Optional.ofNullable(user);
+            return query.uniqueResultOptional();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 }
