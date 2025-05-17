@@ -9,4 +9,5 @@
     <include file="scripts/002_ddl_create_auto_user_post_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/003_dml_fill_auto_user_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/004_ddl_create_price_history_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/005_ddl_create_post_subscriber_table.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
