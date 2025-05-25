@@ -3,21 +3,20 @@ package ru.job4j.cars.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "price_history")
 @Data
+@Entity
+@Table(name = "engine")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class PriceHistory {
+public class Engine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private Long before;
-    private Long after;
-    @CreationTimestamp
-    private LocalDateTime created;
+    private String name;
+    private Float volume;
+    @Column(name = "fuel_type")
+    private String fuelType;
+    @Column(name = "power_hp")
+    private Integer power;
 }

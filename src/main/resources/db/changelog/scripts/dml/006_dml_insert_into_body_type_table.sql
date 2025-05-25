@@ -1,0 +1,28 @@
+insert into body_type (name)
+values
+    ('Sedan'),
+    ('Hatchback'),
+    ('Station Wagon'),
+    ('SUV'),
+    ('Crossover'),
+    ('Coupe'),
+    ('Convertible'),
+    ('Roadster'),
+    ('Minivan'),
+    ('Pickup Truck'),
+    ('Sports Car'),
+    ('Supercar'),
+    ('Hypercar'),
+    ('Limousine'),
+    ('Microcar'),
+    ('City Car'),
+    ('Hot Hatch'),
+    ('Targa'),
+    ('Shooting Brake'),
+    ('Fastback'),
+    ('Liftback'),
+    ('Hardtop'),
+    ('MPV'),
+    ('Camper Van'),
+    ('Off-road Vehicle')
+;

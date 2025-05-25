@@ -5,8 +5,28 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <include file="scripts/001_ddl_create_auto_user_table.sql" relativeToChangelogFile="true"/>
-    <include file="scripts/002_ddl_create_auto_user_post_table.sql" relativeToChangelogFile="true"/>
-    <include file="scripts/003_dml_fill_auto_user_table.sql" relativeToChangelogFile="true"/>
-    <include file="scripts/004_ddl_create_price_history_table.sql" relativeToChangelogFile="true"/>
+
+    <!--    DDL     -->
+    <include file="scripts/ddl/001_ddl_create_auto_user_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/002_ddl_create_owner_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/003_ddl_create_engine_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/004_ddl_create_color_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/005_ddl_create_country_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/006_ddl_create_brand_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/007_ddl_create_body_type_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/008_ddl_create_car_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/009_ddl_create_history_owner_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/010_ddl_create_post_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/011_ddl_create_post_photo_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/012_ddl_create_price_history_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/013_ddl_create_post_subscriber_table.sql" relativeToChangelogFile="true"/>
+
+    <!--    DML     -->
+    <include file="scripts/dml/001_dml_insert_into_user_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/dml/002_dml_insert_into_engine_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/dml/003_dml_insert_into_color_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/dml/004_dml_insert_into_country_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/dml/005_dml_insert_into_brand_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/dml/006_dml_insert_into_body_type_table.sql" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

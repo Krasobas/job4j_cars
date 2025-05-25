@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Component
 @AllArgsConstructor
 public class CrudRepository {
     private final SessionFactory sf;
@@ -23,16 +26,16 @@ public class CrudRepository {
         );
     }
 
-    public void run(String query, Map<String, Object> args) {
-        Consumer<Session> command = session -> {
-            var sq = session
+    public int run(String query, Map<String, Object> args) {
+        Function<Session, Integer> command = session -> {
+            Query sq = session
                     .createQuery(query);
             for (Map.Entry<String, Object> arg : args.entrySet()) {
                 sq.setParameter(arg.getKey(), arg.getValue());
             }
-            sq.executeUpdate();
+            return sq.executeUpdate();
         };
-        run(command);
+        return tx(command);
     }
 
     public <T> Optional<T> optional(String query, Class<T> cl, Map<String, Object> args) {

@@ -5,37 +5,61 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-@Table(name = "auto_post")
+@Table(name = "post")
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private int id;
+    private Long id;
+    private String title;
     private String description;
+    private Long price;
+    private boolean available;
+    @Column(name = "has_photo")
+    private boolean hasPhoto;
     @CreationTimestamp
     private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime updated;
+    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "auto_user_id")
+    @JoinColumn(name = "user_id")
     private User user;
     @ToString.Exclude
+    @OneToOne
+    @JoinColumn(name = "car_id")
+    private Car car;
+
+    @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "auto_post_id")
-    private List<PriceHistory> priceHistories = new ArrayList<>();
+    @JoinColumn(name = "post_id")
+    private Set<PriceHistory> priceHistories = new HashSet<>();
+
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "post_subscriber",
-            joinColumns = { @JoinColumn(name = "auto_post_id") },
-            inverseJoinColumns = { @JoinColumn(name = "auto_user_id") }
+            joinColumns = {@JoinColumn(name = "post_id")},
+            inverseJoinColumns = {@JoinColumn(name = "auto_user_id")}
     )
     private List<User> subscribers = new ArrayList<>();
 
+    public boolean getAvailable() {
+        return available;
+    }
 
+    public boolean getHasPhoto() {
+        return hasPhoto;
+    }
 }
