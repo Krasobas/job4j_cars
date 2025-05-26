@@ -35,7 +35,7 @@ public class HibernateEngineRepository implements EngineRepository {
     public Optional<Engine> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "form Engine where id = :fId",
+                    "from Engine where id = :fId",
                     Engine.class,
                     Map.of("fId", id)
             );
@@ -49,7 +49,7 @@ public class HibernateEngineRepository implements EngineRepository {
     public Optional<Engine> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form Engine where name = :fName",
+                    "from Engine where name = :fName",
                     Engine.class,
                     Map.of("fName", name)
             );
@@ -89,7 +89,7 @@ public class HibernateEngineRepository implements EngineRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete form Engine where id = :fId",
+                    "delete from Engine where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

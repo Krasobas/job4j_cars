@@ -49,7 +49,7 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form User u join fetch u.subscribers where u.name = :fName",
+                    "from User u join fetch u.subscribers where u.name = :fName",
                     User.class,
                     Map.of("fName", name)
             );
@@ -63,7 +63,7 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findByEmailAndPassword(String email, String password) {
         try {
             return crudRepository.optional(
-                    "form User u join fetch u.subscribers where u.email = :fEmail u.password = :fPassword",
+                    "from User u join fetch u.subscribers where u.email = :fEmail u.password = :fPassword",
                     User.class,
                     Map.of(
                             "fEmail", email,

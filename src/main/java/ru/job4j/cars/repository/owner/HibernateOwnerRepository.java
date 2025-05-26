@@ -35,7 +35,7 @@ public class HibernateOwnerRepository implements OwnerRepository {
     public Optional<Owner> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "form Owner where id = :fId",
+                    "from Owner where id = :fId",
                     Owner.class,
                     Map.of("fId", id)
             );
@@ -49,7 +49,7 @@ public class HibernateOwnerRepository implements OwnerRepository {
     public Optional<Owner> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form Owner where name = :fName",
+                    "from Owner where name = :fName",
                     Owner.class,
                     Map.of("fName", name)
             );
@@ -89,7 +89,7 @@ public class HibernateOwnerRepository implements OwnerRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete form Owner where id = :fId",
+                    "delete from Owner where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

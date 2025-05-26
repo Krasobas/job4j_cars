@@ -23,7 +23,7 @@ public class HibernateBrandRepository implements BrandRepository {
     public Collection<Brand> findAll() {
         try {
             return crudRepository.query(
-                    "from Brand b join fetch t.country order by name asc",
+                    "from Brand b join fetch b.country order by b.name asc",
                     Brand.class
             );
         } catch (Exception e) {
@@ -36,7 +36,7 @@ public class HibernateBrandRepository implements BrandRepository {
     public Collection<Brand> findByCountry(Country country) {
         try {
             return crudRepository.query(
-                    "from Brand b join fetch t.country where t.country = :fCountry order by name asc",
+                    "from Brand b join fetch b.country where b.country = :fCountry order by b.name asc",
                     Brand.class,
                     Map.of("fCountry", country)
             );
@@ -50,7 +50,7 @@ public class HibernateBrandRepository implements BrandRepository {
     public Optional<Brand> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "form Brand b join fetch t.country where b.id = :fId",
+                    "from Brand b join fetch b.country where b.id = :fId",
                     Brand.class,
                     Map.of("fId", id)
             );
@@ -64,7 +64,7 @@ public class HibernateBrandRepository implements BrandRepository {
     public Optional<Brand> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form Brand b join fetch t.country where b.name = :fName",
+                    "from Brand b join fetch b.country where b.name = :fName",
                     Brand.class,
                     Map.of("fName", name)
             );
@@ -105,7 +105,7 @@ public class HibernateBrandRepository implements BrandRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete form Brand where id = :fId",
+                    "delete from Brand where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

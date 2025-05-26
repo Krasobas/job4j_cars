@@ -35,7 +35,7 @@ public class HibernateBodyTypeRepository implements BodyTypeRepository {
     public Optional<BodyType> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "form BodyType where id = :fId",
+                    "from BodyType where id = :fId",
                     BodyType.class,
                     Map.of("fId", id)
             );
@@ -49,7 +49,7 @@ public class HibernateBodyTypeRepository implements BodyTypeRepository {
     public Optional<BodyType> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form BodyType where name = :fName",
+                    "from BodyType where name = :fName",
                     BodyType.class,
                     Map.of("fName", name)
             );
@@ -89,7 +89,7 @@ public class HibernateBodyTypeRepository implements BodyTypeRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete form BodyType where id = :fId",
+                    "delete from BodyType where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

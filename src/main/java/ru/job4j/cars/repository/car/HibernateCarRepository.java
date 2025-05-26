@@ -89,6 +89,7 @@ public class HibernateCarRepository implements CarRepository {
                             join fetch c.engine
                             join fetch c.color
                             join fetch c.owners
+                            order by c.year asc
                             """,
                     Car.class
             );

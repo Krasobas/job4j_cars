@@ -35,7 +35,7 @@ public class HibernateCountryRepository implements CountryRepository {
     public Optional<Country> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "form Country where id = :fId",
+                    "from Country where id = :fId",
                     Country.class,
                     Map.of("fId", id)
             );
@@ -49,7 +49,7 @@ public class HibernateCountryRepository implements CountryRepository {
     public Optional<Country> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "form Country where name = :fName",
+                    "from Country where name = :fName",
                     Country.class,
                     Map.of("fName", name)
             );
@@ -89,7 +89,7 @@ public class HibernateCountryRepository implements CountryRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete form Country where id = :fId",
+                    "delete from Country where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

@@ -4,25 +4,26 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "price_history")
 @Data
+@Entity
+@Table(name = "photo")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class PriceHistory {
+public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private Long before;
-    private Long after;
-    @CreationTimestamp
-    private LocalDateTime created;
+    private String path;
+    @Column(name = "is_main")
+    private boolean main;
     @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
+
+
+    public boolean getMain() {
+        return main;
+    }
 }

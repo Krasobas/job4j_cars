@@ -1,9 +1,9 @@
-package ru.job4j.cars.repository.color;
+package ru.job4j.cars.repository.photo;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.springframework.stereotype.Repository;
-import ru.job4j.cars.model.Color;
+import ru.job4j.cars.model.Photo;
 import ru.job4j.cars.repository.CrudRepository;
 
 import java.util.Collection;
@@ -14,16 +14,16 @@ import java.util.Optional;
 @JBossLog
 @Repository
 @AllArgsConstructor
-public class HibernateColorRepository implements ColorRepository {
+public class HibernatePhotoRepository implements PhotoRepository {
 
     private final CrudRepository crudRepository;
 
     @Override
-    public Collection<Color> findAll() {
+    public Collection<Photo> findAll() {
         try {
             return crudRepository.query(
-                    "from Color order by name asc",
-                    Color.class
+                    "from Photo p join fetch p.post",
+                    Photo.class
             );
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -32,11 +32,11 @@ public class HibernateColorRepository implements ColorRepository {
     }
 
     @Override
-    public Optional<Color> findById(Long id) {
+    public Optional<Photo> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "from Color where id = :fId",
-                    Color.class,
+                    "from Photo p join fetch p.post where p.id = :fId",
+                    Photo.class,
                     Map.of("fId", id)
             );
         } catch (Exception e) {
@@ -46,12 +46,12 @@ public class HibernateColorRepository implements ColorRepository {
     }
 
     @Override
-    public Optional<Color> findByName(String name) {
+    public Optional<Photo> findByPath(String path) {
         try {
             return crudRepository.optional(
-                    "from Color where name = :fName",
-                    Color.class,
-                    Map.of("fName", name)
+                    "from Photo p join fetch p.post where p.path = :fPath",
+                    Photo.class,
+                    Map.of("fPath", path)
             );
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -60,23 +60,9 @@ public class HibernateColorRepository implements ColorRepository {
     }
 
     @Override
-    public Optional<Color> findByCode(String code) {
+    public boolean persist(Photo photo) {
         try {
-            return crudRepository.optional(
-                    "from Color where code = :fCode",
-                    Color.class,
-                    Map.of("fCode", code)
-            );
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean persist(Color color) {
-        try {
-            crudRepository.run(session -> session.persist(color));
+            crudRepository.run(session -> session.persist(photo));
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -85,12 +71,21 @@ public class HibernateColorRepository implements ColorRepository {
     }
 
     @Override
-    public boolean update(Color color) {
+    public boolean update(Photo photo) {
         try {
-            return findById(color.getId())
+            if (photo.getMain()) {
+                crudRepository.run(
+                        "update Photo p set p.main = false where p.id != :fId and p.post.id = :fPostId",
+                        Map.of(
+                                "fId", photo.getId(),
+                                "fPostId", photo.getPost().getId()
+                        )
+                );
+            }
+            return findById(photo.getId())
                     .map(origin -> {
-                        origin.setName(color.getName());
-                        origin.setCode(color.getCode());
+                        origin.setPath(photo.getPath());
+                        origin.setMain(photo.getMain());
                         crudRepository.run(session -> session.merge(origin));
                         return origin;
                     }).isPresent();
@@ -104,7 +99,7 @@ public class HibernateColorRepository implements ColorRepository {
     public boolean delete(Long id) {
         try {
             return crudRepository.run(
-                    "delete from Color where id = :fId",
+                    "delete from Photo where id = :fId",
                     Map.of("fId", id)
             ) > 0;
         } catch (Exception e) {

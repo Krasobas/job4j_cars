@@ -26,8 +26,6 @@ public class Post {
     private String description;
     private Long price;
     private boolean available;
-    @Column(name = "has_photo")
-    private boolean hasPhoto;
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
@@ -43,8 +41,12 @@ public class Post {
 
     @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post")
     private Set<PriceHistory> priceHistories = new HashSet<>();
+
+    @ToString.Exclude
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+    private Set<Photo> photos = new HashSet<>();
 
     @ToString.Exclude
     @ManyToMany
@@ -57,9 +59,5 @@ public class Post {
 
     public boolean getAvailable() {
         return available;
-    }
-
-    public boolean getHasPhoto() {
-        return hasPhoto;
     }
 }
