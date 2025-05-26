@@ -131,6 +131,7 @@ public class HibernatePostRepository implements PostRepository {
         }
         return List.of();
     }
+
     @Override
     public Collection<Post> findByCreatedBefore(LocalDateTime time) {
         try {

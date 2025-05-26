@@ -22,7 +22,6 @@ public class Photo {
     @JoinColumn(name = "post_id")
     private Post post;
 
-
     public boolean getMain() {
         return main;
     }
