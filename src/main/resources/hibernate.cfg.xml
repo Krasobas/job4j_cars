@@ -20,6 +20,7 @@
         <mapping class="ru.job4j.cars.model.Country" />
         <mapping class="ru.job4j.cars.model.Engine" />
         <mapping class="ru.job4j.cars.model.Owner" />
+        <mapping class="ru.job4j.cars.model.Photo" />
         <mapping class="ru.job4j.cars.model.Post" />
         <mapping class="ru.job4j.cars.model.PriceHistory" />
         <mapping class="ru.job4j.cars.model.User" />

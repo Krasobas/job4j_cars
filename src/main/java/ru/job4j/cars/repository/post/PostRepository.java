@@ -11,9 +11,15 @@ import java.util.Optional;
 public interface PostRepository {
     Collection<Post> findAll();
 
-    Collection<Post> findWithPhoto();
+    Collection<Post> findByOwnerId(Long ownerId);
 
-    Collection<Post> findByUser(User user);
+    Collection<Post> findBySubscriberId(Long subscriberId);
+
+    Collection<Post> findByAvailability(boolean isAvailable);
+
+    Collection<Post> findByTitleLike(String title);
+
+    Collection<Post> findWithPhoto();
 
     Collection<Post> findByBrand(Brand brand);
 
@@ -27,5 +33,7 @@ public interface PostRepository {
 
     boolean update(Post post);
 
-    boolean delete(Long id);
+    boolean delete(Post post);
+
+    boolean updateSubscribers(Long id, User user);
 }

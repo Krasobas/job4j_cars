@@ -35,17 +35,12 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
     @ToString.Exclude
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "car_id")
     private Car car;
 
     @ToString.Exclude
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post")
-    private Set<PriceHistory> priceHistories = new HashSet<>();
-
-    @ToString.Exclude
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private Set<Photo> photos = new HashSet<>();
 
     @ToString.Exclude
@@ -55,7 +50,7 @@ public class Post {
             joinColumns = {@JoinColumn(name = "post_id")},
             inverseJoinColumns = {@JoinColumn(name = "auto_user_id")}
     )
-    private List<User> subscribers = new ArrayList<>();
+    private Set<User> subscribers = new HashSet<>();
 
     public boolean getAvailable() {
         return available;

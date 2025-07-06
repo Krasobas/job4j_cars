@@ -1,17 +1,16 @@
 package ru.job4j.cars.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "car")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +34,7 @@ public class Car {
     @JoinColumn(name = "color_id", foreignKey = @ForeignKey(name = "COLOR_ID_FK"))
     private Color color;
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "history_owner",
             joinColumns = {
@@ -45,8 +44,19 @@ public class Car {
                     @JoinColumn(name = "owner_id")
             }
     )
-    private Set<Owner> owners = new HashSet<>();
+    private List<Owner> owners = new ArrayList<>();
     @Column(name = "manufacture_year")
     private Integer year;
     private Integer mileage;
+
+    public Car(Brand brand, String model, BodyType bodyType, Engine engine, Color color, List<Owner> owners, Integer year, Integer mileage) {
+        this.brand = brand;
+        this.model = model;
+        this.bodyType = bodyType;
+        this.engine = engine;
+        this.color = color;
+        this.owners = owners;
+        this.year = year;
+        this.mileage = mileage;
+    }
 }

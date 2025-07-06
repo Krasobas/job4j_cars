@@ -14,6 +14,7 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+    @EqualsAndHashCode.Include
     private String path;
     @Column(name = "is_main")
     private boolean main;

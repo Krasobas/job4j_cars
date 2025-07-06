@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "auto_user")
@@ -20,8 +19,11 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String role;
+    private String phone;
+    private String role = "user";
+    @Column(name = "timezone")
+    private String timeZone = TimeZone.getDefault().getDisplayName();
     @ToString.Exclude
     @ManyToMany(mappedBy = "subscribers")
-    Set<Post> subscriptions = new HashSet<>();
+    private Set<Post> subscriptions = new HashSet<>();
 }

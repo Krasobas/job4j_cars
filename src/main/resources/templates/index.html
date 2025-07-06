@@ -3,63 +3,31 @@
 
 <head th:replace="~{fragments :: head('Home')}"></head>
 
-<body class="d-flex flex-column min-vh-100">
-<nav th:replace="~{fragments :: navbar}"></nav>
+<body class="window">
+<div class="content-card">
+    <h1 class="mb-3">Car Market</h1>
+    <p class="text-muted mb-4">A modern web app for buying/selling used cars built with enterprise-grade technologies to streamline your workflow and boost productivity.</p>
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-            <div class="mb-4">
-                <i class="fas fa-car-side display-1 text-primary"></i>
-            </div>
-            <h1 class="display-4 fw-bold mb-4">Welcome to CarSales</h1>
-            <p class="lead mb-4">Find your dream car or sell your vehicle with our easy-to-use platform.</p>
-            <hr class="my-4">
-            <div class="mb-5">
-                <h3 class="h4 mb-4">Built with Modern Technologies</h3>
-                <div class="row g-4 justify-content-center">
-                    <div class="col-6 col-md-3">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <i class="fas fa-leaf text-success fs-2 mb-3"></i>
-                                <h5>Spring Boot</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <i class="fas fa-code text-warning fs-2 mb-3"></i>
-                                <h5>Thymeleaf</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <i class="fas fa-database text-info fs-2 mb-3"></i>
-                                <h5>Hibernate</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <i class="fas fa-palette text-danger fs-2 mb-3"></i>
-                                <h5>Bootstrap</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <a th:href="@{/cars}" class="btn btn-primary btn-lg px-5">
-                <i class="fas fa-search me-2"></i>Explore Listings
-            </a>
-        </div>
+    <div class="tech-badges">
+        <span class="tech-badge">Java 21</span>
+        <span class="tech-badge">Spring Boot</span>
+        <span class="tech-badge">Spring MVC</span>
+        <span class="tech-badge">Hibernate</span>
+        <span class="tech-badge">Liquibase</span>
+        <span class="tech-badge">PostgreSQL</span>
+        <span class="tech-badge">Lombok</span>
+        <span class="tech-badge">MapStruct</span>
+        <span class="tech-badge">Maven</span>
+        <span class="tech-badge">Thymeleaf</span>
+        <span class="tech-badge">Bootstrap</span>
     </div>
+
+    <a href="/posts" class="btn btn-primary">
+        <i class="bi bi-arrow-right-circle me-1"></i> Explore
+    </a>
 </div>
 
-<footer th:replace="~{fragments :: footer}" class="mt-auto"></footer>
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 
 </html>

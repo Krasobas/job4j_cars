@@ -35,7 +35,7 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "from User u where u.id = :fId",
+                    "select distinct u from User u left join fetch u.subscriptions where u.id = :fId",
                     User.class,
                     Map.of("fId", id)
             );
@@ -49,7 +49,7 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findByName(String name) {
         try {
             return crudRepository.optional(
-                    "from User u join fetch u.subscribers where u.name = :fName",
+                    "select distinct u from User u left join fetch u.subscriptions where u.name = :fName",
                     User.class,
                     Map.of("fName", name)
             );
@@ -63,7 +63,7 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findByEmailAndPassword(String email, String password) {
         try {
             return crudRepository.optional(
-                    "from User u join fetch u.subscribers where u.email = :fEmail u.password = :fPassword",
+                    "select distinct u from User u left join fetch u.subscriptions where u.email = :fEmail and u.password = :fPassword",
                     User.class,
                     Map.of(
                             "fEmail", email,

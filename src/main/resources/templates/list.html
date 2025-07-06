@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Car Listings')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Car Listings</h1>
+        <a th:href="@{/cars/add}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add New Listing
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div th:replace="~{fragments :: filters}"></div>
+
+    <!-- Alert for no results -->
+    <div th:if="${#lists.isEmpty(cars)}" class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No car listings found matching your criteria.
+    </div>
+
+    <!-- Car listings -->
+    <div class="row g-4">
+        <div th:each="car : ${cars}" class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="position-relative">
+                    <img th:if="${!#lists.isEmpty(car.photos)}" th:src="@{'/uploads/' + ${car.photos[0]}}" class="card-img-top" alt="Car image" style="height: 200px; object-fit: cover;">
+                    <img th:if="${#lists.isEmpty(car.photos)}" th:src="@{/images/no-image.jpg}" class="card-img-top" alt="No image available" style="height: 200px; object-fit: cover;">
+                    <div th:if="${car.status == 'SOLD'}" class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-danger">Sold</span>
+                    </div>
+                    <div th:if="${#temporals.day(car.createdAt) == #temporals.day(#temporals.createNow()) and
+                                    #temporals.hour(car.createdAt) >= #temporals.hour(#temporals.createNow().minusHours(24))}"
+                         class="position-absolute top-0 start-0 m-2">
+                        <span class="badge bg-success">New</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${car.make + ' ' + car.model + ' (' + car.year + ')'}">Car Title</h5>
+                    <p class="text-muted mb-1" th:text="${car.bodyType + ' • ' + car.category}">Sedan • Luxury</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="text-primary mb-0" th:text="${'$' + #numbers.formatDecimal(car.price, 0, 'COMMA', 2, 'POINT')}">$25,000.00</h4>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#priceHistoryModal"
+                                th:data-car-id="${car.id}"
+                                onclick="loadPriceHistory(this.getAttribute('data-car-id'))">
+                            <i class="fas fa-history me-1"></i>Price History
+                        </button>
+                    </div>
+                    <p class="card-text small text-muted">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        <span th:text="${#temporals.format(car.createdAt, 'MMM dd, yyyy')}">May 20, 2025</span>
+                    </p>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between">
+                    <a th:href="@{'/cars/' + ${car.id}}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                    <a th:if="${#request.userPrincipal != null && car.user.username == #request.userPrincipal.name}"
+                       th:href="@{'/cars/edit/' + ${car.id}}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/cars(page=${currentPage - 1}, last24Hours=${param.last24Hours}, withPhotos=${param.withPhotos}, make=${param.make})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${currentPage == i} ? 'active'">
+                <a class="page-link" th:href="@{/cars(page=${i}, last24Hours=${param.last24Hours}, withPhotos=${param.withPhotos}, make=${param.make})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/cars(page=${currentPage + 1}, last24Hours=${param.last24Hours}, withPhotos=${param.withPhotos}, make=${param.make})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Price History Modal -->
+<div th:replace="~{fragments :: priceHistoryModal}"></div>
+
+<footer th:replace="~{fragments :: footer}" class="mt-auto"></footer>
+
+<!-- Price history loading script -->
+<script th:inline="javascript">
+    function loadPriceHistory(carId) {
+        const modalContent = document.getElementById('priceHistoryContent');
+        modalContent.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+        fetch(`/api/cars/${carId}/price-history`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    modalContent.innerHTML = '<div class="alert alert-info">No price changes recorded yet.</div>';
+                    return;
+                }
+
+                let html = '<div class="table-responsive"><table class="table table-striped">';
+                html += '<thead><tr><th>Date</th><th>Price</th></tr></thead><tbody>';
+
+                data.forEach(item => {
+                    html += `<tr>
+                        <td>${new Date(item.date).toLocaleDateString()}</td>
+                        <td>$${item.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table></div>';
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                modalContent.innerHTML = '<div class="alert alert-danger">Failed to load price history.</div>';
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${post != null} ? 'Edit Post' : 'Create New Post')}"></head>
+<body>
+
+<div class="container py-4">
+    <header th:replace="~{fragments :: header('')}"></header>
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/posts}">Posts</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <span th:text="${post != null} ? 'Edit Post' : 'New Post'"></span>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <form th:action="${post != null} ? @{'/posts/' + ${post.id}} : @{/posts}"
+          th:method="${post != null} ? 'post' : 'post'"
+          enctype="multipart/form-data" class="needs-validation" novalidate>
+        <input type="hidden" name="_method" th:if="${post != null}" value="put">
+
+        <!-- Basic Information Section -->
+        <div class="form-section card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-card-text me-2"></i>Basic Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="title" class="form-label">Title*</label>
+                        <input type="text" class="form-control" id="title" name="title" required th:value="${post?.title}">
+                        <div class="invalid-feedback">Please provide a title for your post.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="price" class="form-label">Price ($)*</label>
+                        <input type="number" class="form-control" id="price" name="price" required min="0" th:value="${post?.price}">
+                        <div class="invalid-feedback">Please provide a valid price.</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description*</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required th:text="${post?.description}"></textarea>
+                    <div class="invalid-feedback">Please provide a description.</div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="available" name="available" th:checked="${post?.available}">
+                    <label class="form-check-label" for="available">This car is available for sale</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Car Details Section -->
+        <div class="form-section card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-car-front me-2"></i>Car Details</h5>
+                <div class="row">
+                    <!-- Brand -->
+                    <div th:replace="~{fragments :: select-field('brandId', 'Brand', ${brands}, ${post?.brandId}, true)}"></div>
+                    <div class="col-md-4 mb-3">
+                        <label for="model" class="form-label">Model*</label>
+                        <input type="text" class="form-control" id="model" name="model" required th:value="${post?.model}">
+                        <div class="invalid-feedback">Please provide a model.</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="year" class="form-label">Year*</label>
+                        <input type="number" class="form-control" id="year" name="year" min="1900" max="2023" required th:value="${post?.year}">
+                        <div class="invalid-feedback">Please provide a valid year.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Body Type -->
+                    <div th:replace="~{fragments :: select-field('bodyTypeId', 'Body Type', ${bodyTypes}, ${post?.bodyTypeId}, true)}"></div>
+
+                    <!-- Engine -->
+                    <div th:replace="~{fragments :: select-field('engineId', 'Engine', ${engines}, ${post?.engineId}, true)}"></div>
+
+                    <!-- Color -->
+                    <div th:replace="~{fragments :: select-field('colorId', 'Color', ${colors}, ${post?.colorId}, true)}"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Owners</label>
+
+                        <div id="owners-container">
+                            <!-- Если пост новый, добавляем пустой инпут -->
+                            <div class="input-group mb-2 owner-item" th:if="${post?.owners == null or post.owners.size() == 0}">
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        name="owners[0]"
+                                        placeholder="Owner name"
+                                        required
+                                />
+                                <button type="button" class="btn btn-outline-danger remove-owner-btn">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Если пост редактируется, показываем существующих владельцев -->
+                            <div class="input-group mb-2 owner-item"
+                                 th:each="owner, stat : ${post?.owners}">
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        th:name="'owners[' + ${stat.index} + ']'"
+                                        th:value="${owner}"
+                                        placeholder="Owner name"
+                                        required
+                                />
+                                <button type="button" class="btn btn-outline-danger remove-owner-btn">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary mt-2" id="add-owner-btn">
+                            <i class="bi bi-plus"></i> Add owner
+                        </button>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="mileage" class="form-label">Mileage (km)*</label>
+                        <input type="number" class="form-control" id="mileage" name="mileage" min="0" required th:value="${post?.mileage}">
+                        <div class="invalid-feedback">Please provide a valid mileage.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div class="form-section card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-images me-2"></i>Photos</h5>
+                <div class="mb-3">
+                    <label for="photo-files" class="form-label">
+                        <span th:text="${post != null} ? 'Add more photos (max 5 total)' : 'Upload photos (max 5)'"></span>
+                    </label>
+                    <input
+                            class="form-control"
+                            type="file"
+                            id="photo-files"
+                            name="photo-files"
+                            multiple
+                            accept="image/*"
+                            th:required="${post == null or post.photos.size() == 0}"
+                    >
+                    <div class="form-text">First photo will be the main image.</div>
+                </div>
+
+                <!-- Preview Container for new photos -->
+                <div class="row g-2 mt-2" id="photoPreviewContainer"></div>
+
+                <!-- Existing photos for editing -->
+                <div class="row g-2 mt-2" th:if="${post?.photos != null and post.photos.size() > 0}">
+                    <div class="col-6 col-md-4 col-lg-3" th:each="photo, stat : ${post.photos}">
+                        <div class="card">
+                            <img th:src="@{'/photos/' + ${photo}}" class="card-img-top img-thumbnail">
+                            <div class="card-body p-2 text-center">
+                                <span th:if="${stat.index == 0}" class="badge bg-primary">Main</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-1 remove-existing-photo-btn"
+                                        th:attr="data-photo=${photo}">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                                <input type="hidden" th:name="'existingPhotos'" th:value="${photo}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-between mt-4">
+            <a th:href="@{/posts}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i> <span th:text="${post != null} ? 'Update Post' : 'Save Post'"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+    // Дополнительный скрипт для обработки удаления существующих фото
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработка удаления существующих фото
+        document.querySelectorAll('.remove-existing-photo-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const photoCard = this.closest('.col-6');
+                const photoName = this.getAttribute('data-photo');
+
+                // Создаем скрытое поле для отметки удаленных фото
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'deletedPhotos';
+                hiddenInput.value = photoName;
+                document.querySelector('form').appendChild(hiddenInput);
+
+                // Удаляем карточку фото
+                photoCard.remove();
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Registration')}"></head>
+<body class="window">
+<div class="content-card position-relative">
+  <a th:href="@{/}" class="btn-close position-absolute top-0 end-0 m-3"></a>
+  <h1 class="mb-4 text-center">Registration</h1>
+  <form class="card-body" th:action="@{/users/register}" th:method="post">
+    <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
+    <div class="mb-3 form-floating">
+      <input type="text" class="form-control" id="name" name="name" placeholder="John" required>
+      <label for="name"><b>Name</b></label>
+    </div>
+    <div class="mb-3 form-floating">
+      <input type="email"
+             id="email"
+             name="email"
+             class="form-control"
+             placeholder="Enter your email"
+             autocomplete="email"
+             required
+             pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+      <label for="email"><b>Email</b></label>
+    </div>
+    <div class="mb-3 form-floating">
+      <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+      <label for="password"><b>Password</b></label>
+    </div>
+    <!-- Time zone -->
+    <div class="mb-3 form-floating">
+      <select class="form-select" id="timeZone" name="timeZone" required>
+        <option value="" selected disabled>Select time zone</option>
+        <option th:each="timezone : ${timeZones}"
+                th:value="${timezone.value}"
+                th:text="${timezone.key}">TimeZone</option>
+      </select>
+      <label for="timeZone"><b>Time zone</b></label>
+    </div>
+    <div class="d-flex justify-content-center mt-4">
+      <button id="register" class="btn btn-primary" type="submit">Register</button>
+    </div>
+  </form>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

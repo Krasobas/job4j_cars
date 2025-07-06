@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Car Post')}"></head>
+<body>
+<div class="container py-4">
+    <header th:replace="~{fragments :: header('')}"></header>
+
+    <!-- Single Post View - Modified Layout -->
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-sm mb-5">
+                <div class="row g-0">
+                    <!-- Left Column - Photos and Contact Form -->
+                    <div class="col-md-5">
+                        <!-- Carousel for Images -->
+                        <div th:if="${!post.photos.isEmpty()}" class="mb-4">
+                            <div id="postCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    <button th:each="photo, iter : ${post.photos}"
+                                            type="button"
+                                            data-bs-target="#postCarousel"
+                                            th:data-bs-slide-to="${iter.index}"
+                                            th:classappend="${iter.index == 0} ? 'active' : ''"></button>
+                                </div>
+                                <div class="carousel-inner rounded-top">
+                                    <div th:each="photo, iter : ${post.photos}"
+                                         class="carousel-item"
+                                         th:classappend="${iter.index == 0} ? 'active' : ''">
+                                        <img th:src="@{'/photos/' + ${photo}}" class="d-block w-100" style="height: 300px; object-fit: cover;" alt="Car photo">
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#postCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Contact Form (Fixed at the bottom of left column) -->
+                        <div class="card sticky-top" style="top: 20px;">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Contact Seller</h5>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-person-circle fs-4 me-2"></i>
+                                    <span th:text="${post.userName}">SellerName</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-telephone me-2"></i>
+                                    <span th:text="${post.userPhone ?: 'Not provided'}">+1234567890</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    <span th:text="${post.userEmail}">seller@example.com</span>
+                                </div>
+                                <button id="contactBtn" class="btn btn-outline-primary w-100"
+                                        data-bs-toggle="modal" data-bs-target="#contactModal"
+                                        data-post-id="${post.id}">
+                                    <i class="bi bi-chat-left-text me-1"></i> Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Post Details -->
+                    <div class="col-md-7">
+                        <div class="card-body h-100">
+                            <!-- Post Header with Close and Like buttons -->
+                            <div class="card-header bg-white border-bottom-0 pt-0 pb-0 px-0">
+                                <div class="d-flex align-items-center">
+                                    <!-- Like/Subscribe Button -->
+                                    <button th:unless="${post.userId == user.id}" class="btn btn-outline-primary" id="likeBtn" th:data-post-id="${post.id}">
+                                        <i class="bi" th:classappend="${post.liked} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
+                                        <span th:text="${post.liked} ? 'Subscribed' : 'Subscribe'"></span>
+                                        <span class="badge bg-secondary ms-1" th:text="${post.subscribersCount}">0</span>
+                                    </button>
+
+                                    <!-- Close Button -->
+                                    <a th:href="@{/posts}" class="btn btn-outline-secondary ms-auto">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Post Title and Status -->
+                            <div class="d-flex justify-content-between align-items-start mb-3 mt-3">
+                                <h2 class="card-title mb-0" th:text="${post.brand + ' ' + post.model}">Brand Model</h2>
+                                <span class="badge post-status fs-6" th:classappend="${post.available} ? 'status-available' : 'status-sold'"
+                                      th:text="${post.available} ? 'Available' : 'Sold'">Status</span>
+                            </div>
+
+                            <!-- Price and Basic Info -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="text-primary mb-0" th:text="${'$' + #numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}">$25,000</h3>
+                                <div class="text-muted" th:text="${post.year} + ' • ' + ${post.mileage} + ' km'">2020 • 50000 km</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <h5 class="mb-2">Description</h5>
+                                <pre class="card-text" style="white-space: pre-wrap;" th:text="${post.description}">Full description of the car...</pre>
+                            </div>
+
+                            <!-- Details Section -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Details</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex">
+                                            <span class="text-muted me-2">Body Type:</span>
+                                            <span th:text="${post.bodyType}">Sedan</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex">
+                                            <span class="text-muted me-2">Engine:</span>
+                                            <span th:text="${post.engine}">2.0L Turbo</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex">
+                                            <span class="text-muted me-2">Color:</span>
+                                            <span th:text="${post.color}">Red</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex">
+                                            <span class="text-muted me-2">Owners:</span>
+                                            <span th:text="${#strings.listJoin(post.owners, ', ')}">John Doe, Jane Smith</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Post Date and Actions -->
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
+                                <div class="d-flex flex-column me-2">
+                                    <small class="text-muted" th:text="'Posted: ' + ${#temporals.format(post.created, 'd MMM yyyy')}">Posted: 15 Jun 2023</small>
+                                    <small th:unless="${post.updated == null}" class="text-muted" th:text="'Updated: ' + ${#temporals.format(post.updated, 'd MMM yyyy')}">Updated: 16 Jun 2023</small>
+                                </div>
+                                <div class="btn-group" th:if="${post.userId == user.id}">
+                                    <a th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-delete-post"
+                                            th:data-post-id="${post.id}">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactModalLabel">Contact Seller</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="messageText" class="form-label">Your Message</label>
+                            <textarea class="form-control" id="messageText" rows="5"
+                                      th:placeholder="|Hi, I'm interested in your ${post.brand} ${post.model}...|"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: delete-modal}"></div>
+</div>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

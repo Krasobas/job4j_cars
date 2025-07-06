@@ -26,6 +26,10 @@ public class CrudRepository {
         );
     }
 
+    public <T> Optional<T> runFunction(Function<Session, T> command) {
+        return Optional.ofNullable(tx(command));
+    }
+
     public int run(String query, Map<String, Object> args) {
         Function<Session, Integer> command = session -> {
             Query sq = session
