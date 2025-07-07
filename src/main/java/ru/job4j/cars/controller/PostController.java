@@ -50,31 +50,40 @@ public class PostController {
                 : service.findByAvailability(user, "available".equals(filter));
         model.addAttribute("posts", list)
                 .addAttribute("page", "posts")
+                .addAttribute("brands", list.stream().map(PostListingDto::getBrand).toList())
+                .addAttribute("models", list.stream().map(PostListingDto::getModel).toList())
                 .addAttribute("filter", filter);
         return "posts/post-list";
     }
 
     @GetMapping("/my")
     public String getMy(@SessionAttribute UserSessionDto user, Model model) {
-        model.addAttribute("posts", service.findByOwnerId(user))
+        Collection<PostListingDto> list = service.findByOwnerId(user);
+                model.addAttribute("posts", list)
+                .addAttribute("brands", list.stream().map(PostListingDto::getBrand).toList())
+                .addAttribute("models", list.stream().map(PostListingDto::getModel).toList())
                 .addAttribute("page", "my");
         return "posts/post-list";
     }
 
     @GetMapping("/subscriptions")
     public String getFavorites(@SessionAttribute UserSessionDto user, Model model) {
-        model.addAttribute("posts", service.findBySubscriberId(user))
+        Collection<PostListingDto> list = service.findBySubscriberId(user);
+        model.addAttribute("posts", list)
+                .addAttribute("brands", list.stream().map(PostListingDto::getBrand).toList())
+                .addAttribute("models", list.stream().map(PostListingDto::getModel).toList())
                 .addAttribute("page", "subscriptions");
         return "posts/post-list";
     }
 
     @GetMapping("/search")
     public String searchByName(@RequestParam(name = "title") String title, @SessionAttribute UserSessionDto user, Model model) {
-        model.addAttribute("posts",
-                        Objects.isNull(title) || title.isBlank()
-                                ? service.findAll(user)
-                                : service.findByTitleLike(user, title)
-                )
+        Collection<PostListingDto> list = Objects.isNull(title) || title.isBlank()
+                ? service.findAll(user)
+                : service.findByTitleLike(user, title);
+        model.addAttribute("posts", list)
+                .addAttribute("brands", list.stream().map(PostListingDto::getBrand).toList())
+                .addAttribute("models", list.stream().map(PostListingDto::getModel).toList())
                 .addAttribute("page", "search");
         return "posts/post-list";
     }

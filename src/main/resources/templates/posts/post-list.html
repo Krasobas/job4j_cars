@@ -11,6 +11,33 @@
                 <button onclick="filterPosts('available')" class="btn btn-outline-primary">Available</button>
                 <button onclick="filterPosts('sold')" class="btn btn-outline-primary">Sold</button>
             </div>
+            <div class="dropdown ms-2 d-inline-block">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="brandDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Brand
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="brandDropdown" id="brandFilter">
+                    <li><a class="dropdown-item" href="#" onclick="filterByBrand('all')">All Brands</a></li>
+                    <li th:each="brand : ${brands}">
+                        <a class="dropdown-item" href="#" th:text="${brand}"
+                           th:data-brand="${brand}"
+                           onclick="filterByBrand(this.dataset.brand)"></a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="dropdown ms-2 d-inline-block">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Model
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="modelDropdown" id="modelFilter">
+                    <li><a class="dropdown-item" href="#" onclick="filterByModel('all')">All Models</a></li>
+                    <li th:each="model : ${models}">
+                        <a class="dropdown-item" href="#" th:text="${model}"
+                           th:data-model="${model}"
+                           th:onclick="'filterByModel(this.dataset.model)'"></a>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="col-md-6 text-md-end d-flex justify-content-md-end align-items-center">
             <div class="btn-group me-3" role="group" aria-label="View toggle">
@@ -47,10 +74,11 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0" th:text="${post.brand + ' ' + post.model}">Brand Model</h5>
+                            <h5 class="card-title mb-0 car-brand" th:text="${post.brand}">Brand</h5>
                             <span class="badge post-status" th:classappend="${post.available} ? 'status-available' : 'status-sold'"
                                   th:text="${post.available} ? 'Available' : 'Sold'">Status</span>
                         </div>
+                        <h6 class="card-title mb-0 car-model mb-2" th:text="${post.model}">Model</h6>
                         <p class="card-text text-muted small mb-2" th:text="${post.year} + ' • ' + ${post.mileage} + ' km'">2020 • 50000 km</p>
                         <p class="card-text mb-2" th:text="${post.title}">Post Title</p>
                         <p class="card-text text-muted small" th:text="${post.description.length() > 80 ? post.description.substring(0, 80) + '...' : post.description}">
@@ -97,7 +125,8 @@
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between">
                                             <div>
-                                                <h5 class="card-title" th:text="${post.brand + ' ' + post.model}">Brand Model</h5>
+                                                <h5 class="card-title mb-0 car-brand" th:text="${post.brand}">Brand</h5>
+                                                <h6 class="card-title mb-0 car-model mb-2" th:text="${post.model}">Model</h6>
                                                 <p class="card-text text-muted small mb-2" th:text="${post.year} + ' • ' + ${post.mileage} + ' km'">2020 • 50000 km</p>
                                             </div>
                                             <div>
@@ -143,30 +172,76 @@
 <div th:replace="~{fragments :: footer}"></div>
 
 <script>
+    // Текущие фильтры
+    let currentStatusFilter = 'all';
+    let currentBrandFilter = 'all';
+    let currentModelFilter = 'all';
+
     function filterPosts(filter) {
+        currentStatusFilter = filter;
+        applyAllFilters();
+        updateActiveButtons();
+    }
+
+    function filterByBrand(brand) {
+        currentBrandFilter = brand;
+        applyAllFilters();
+        updateBrandDropdownText(brand);
+    }
+
+    function filterByModel(model) {
+        currentModelFilter = model;
+        applyAllFilters();
+        updateModelDropdownText(model);
+    }
+
+    function applyAllFilters() {
         const allPosts = document.querySelectorAll('.post-card');
 
         allPosts.forEach(post => {
             const isAvailable = post.dataset.available === 'true';
+            const postBrand = post.querySelector('.car-brand').textContent;
+            const postModel = post.querySelector('.car-model').textContent;
 
-            if (filter === 'all') {
+            const statusMatch =
+                currentStatusFilter === 'all' ||
+                (currentStatusFilter === 'available' && isAvailable) ||
+                (currentStatusFilter === 'sold' && !isAvailable);
+
+            const brandMatch =
+                currentBrandFilter === 'all' ||
+                postBrand === currentBrandFilter;
+
+            const modelMatch =
+                currentModelFilter === 'all' ||
+                postModel === currentModelFilter;
+
+            if (statusMatch && brandMatch && modelMatch) {
                 post.closest('.col-lg-4, .col-12').style.display = 'block';
-            }
-            else if (filter === 'available' && isAvailable) {
-                post.closest('.col-lg-4, .col-12').style.display = 'block';
-            }
-            else if (filter === 'sold' && !isAvailable) {
-                post.closest('.col-lg-4, .col-12').style.display = 'block';
-            }
-            else {
+            } else {
                 post.closest('.col-lg-4, .col-12').style.display = 'none';
             }
         });
+    }
 
-        document.querySelectorAll('.btn-group[aria-label="Post filters"] .btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
+    function updateActiveButtons() {
+        document.querySelectorAll('.btn-group[aria-label="Post filters"] .btn:not(.dropdown-toggle)')
+            .forEach(btn => btn.classList.remove('active'));
+
+        if (currentStatusFilter === 'all' || currentStatusFilter === 'available' || currentStatusFilter === 'sold') {
+            document.querySelector(`.btn-group[aria-label="Post filters"] button[onclick="filterPosts('${currentStatusFilter}')"]`)
+                .classList.add('active');
+        }
+    }
+
+    function updateBrandDropdownText(brand) {
+        document.getElementById('brandDropdown').textContent =
+            brand === 'all' ? 'Brand' : brand;
+    }
+
+    function updateModelDropdownText(model) {
+        document.getElementById('modelDropdown').textContent =
+            model === 'all' ? 'Model' : model;
     }
 </script>
 </body>
