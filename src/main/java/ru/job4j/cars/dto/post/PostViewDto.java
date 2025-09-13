@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -28,9 +29,11 @@ public class PostViewDto {
     private ZonedDateTime updated;
     private int subscribersCount;
     private List<String> owners;
+    private List<String> history;
     private Long userId;
     private String userName;
     private String userPhone;
     private String userEmail;
     private boolean liked;
+    private boolean priceUp;
 }

@@ -24,6 +24,9 @@ public class User {
     @Column(name = "timezone")
     private String timeZone = TimeZone.getDefault().getDisplayName();
     @ToString.Exclude
-    @ManyToMany(mappedBy = "subscribers")
+    @ManyToMany(mappedBy = "subscribers", fetch = FetchType.LAZY)
     private Set<Post> subscriptions = new HashSet<>();
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "recipients", fetch = FetchType.LAZY)
+    private Set<Notification> notifications = new HashSet<>();
 }

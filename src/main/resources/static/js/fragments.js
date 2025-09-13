@@ -258,3 +258,113 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+        // Notifications functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modal manually
+            const notificationsBtn = document.getElementById('notificationsBtn');
+            const notificationsModal = document.getElementById('notificationsModal');
+
+            if (notificationsBtn && notificationsModal) {
+                const modal = new bootstrap.Modal(notificationsModal);
+
+                notificationsBtn.addEventListener('click', function() {
+                    modal.show();
+                });
+            }
+
+            // Show delete button on hover
+            document.querySelectorAll('.notification-item').forEach(item => {
+                const deleteBtn = item.querySelector('.delete-notification-btn');
+
+                if (deleteBtn) {
+                    item.addEventListener('mouseenter', function() {
+                        deleteBtn.style.display = 'inline-block';
+                    });
+
+                    item.addEventListener('mouseleave', function() {
+                        deleteBtn.style.display = 'none';
+                    });
+                }
+            });
+
+            // Handle delete notification
+            document.querySelectorAll('.delete-notification-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const notificationId = this.getAttribute('data-notification-id');
+                    deleteNotification(notificationId);
+                });
+            });
+        });
+
+        function deleteNotification(notificationId) {
+           console.log('deleteNotification called with ID:', notificationId);
+           if (confirm('Are you sure you want to delete this notification?')) {
+               console.log('User confirmed deletion');
+
+               const formData = new FormData();
+               formData.append('_method', 'delete');
+
+               fetch(`/notifications/${notificationId}`, {
+                   method: 'POST',
+                   body: formData,
+                   headers: {
+                       'X-Requested-With': 'XMLHttpRequest'
+                   }
+               })
+               .then(response => {
+                   console.log('Delete response:', response);
+                   if (response.ok) {
+                       console.log('Deletion successful');
+                       // Remove notification from DOM
+                       const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                       if (notificationItem) {
+                           notificationItem.remove();
+                           console.log('Notification item removed from DOM');
+                       }
+
+                       // Update notification count
+                       updateNotificationCount();
+
+                       // Show empty state if no notifications left
+                       const remainingNotifications = document.querySelectorAll('.notification-item');
+                       if (remainingNotifications.length === 0) {
+                           console.log('No notifications left, reloading page');
+                           location.reload();
+                       }
+                   } else {
+                       console.error('Delete failed with status:', response.status);
+                       alert('Error deleting notification');
+                   }
+               })
+               .catch(error => {
+                   console.error('Error during deletion:', error);
+                   alert('Error deleting notification');
+               });
+           } else {
+               console.log('User cancelled deletion');
+           }
+        }
+
+        function updateNotificationCount() {
+            const remainingNotifications = document.querySelectorAll('.notification-item').length;
+            const badge = document.querySelector('.badge');
+            if (badge) {
+                if (remainingNotifications === 0) {
+                    badge.style.display = 'none';
+                } else {
+                    badge.textContent = remainingNotifications;
+                }
+            }
+        }
+
+        function markAllAsRead() {
+            // This function can be implemented to mark all notifications as read
+            // For now, it just closes the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('notificationsModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }

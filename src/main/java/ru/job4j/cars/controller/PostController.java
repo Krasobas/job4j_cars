@@ -1,7 +1,5 @@
 package ru.job4j.cars.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -13,12 +11,7 @@ import ru.job4j.cars.dto.post.PostCreateDto;
 import ru.job4j.cars.dto.post.PostEditDto;
 import ru.job4j.cars.dto.post.PostListingDto;
 import ru.job4j.cars.dto.post.PostViewDto;
-import ru.job4j.cars.dto.user.UserCreateDto;
-import ru.job4j.cars.dto.user.UserLoginDto;
 import ru.job4j.cars.dto.user.UserSessionDto;
-import ru.job4j.cars.model.Photo;
-import ru.job4j.cars.model.Post;
-import ru.job4j.cars.model.User;
 import ru.job4j.cars.service.bodytype.BodyTypeService;
 import ru.job4j.cars.service.brand.BrandService;
 import ru.job4j.cars.service.color.ColorService;
@@ -26,7 +19,6 @@ import ru.job4j.cars.service.engine.EngineService;
 import ru.job4j.cars.service.photo.PhotoService;
 import ru.job4j.cars.service.post.PostService;
 import ru.job4j.cars.service.storage.FileStorageService;
-import ru.job4j.cars.service.user.UserService;
 
 import java.util.*;
 

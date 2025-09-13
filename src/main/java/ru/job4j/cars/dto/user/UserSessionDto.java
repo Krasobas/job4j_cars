@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import ru.job4j.cars.dto.notification.NotificationDto;
+import ru.job4j.cars.dto.post.PostListingDto;
 import ru.job4j.cars.model.Post;
 
 import java.util.ArrayList;

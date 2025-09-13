@@ -61,12 +61,12 @@ public class HibernateCarRepository implements CarRepository {
         try {
             return crudRepository.optional(
                     """
-                            from Car c
+                            select distinct c from Car c
                             join fetch c.brand
                             join fetch c.bodyType
                             join fetch c.engine
                             join fetch c.color
-                            join fetch c.owners
+                            left join fetch c.owners
                             where c.id = :fId
                             """,
                     Car.class,

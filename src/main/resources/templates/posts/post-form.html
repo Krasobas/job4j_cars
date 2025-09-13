@@ -186,25 +186,74 @@
 <div th:replace="~{fragments :: footer}"></div>
 
 <script>
-    // Дополнительный скрипт для обработки удаления существующих фото
     document.addEventListener('DOMContentLoaded', function() {
-        // Обработка удаления существующих фото
-        document.querySelectorAll('.remove-existing-photo-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const photoCard = this.closest('.col-6');
-                const photoName = this.getAttribute('data-photo');
+        const form = document.querySelector('form.needs-validation');
+        if (!form) return;
 
-                // Создаем скрытое поле для отметки удаленных фото
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'deletedPhotos';
-                hiddenInput.value = photoName;
-                document.querySelector('form').appendChild(hiddenInput);
+        // Хранилище удаленных фото
+        let deletedPhotos = [];
 
-                // Удаляем карточку фото
+        // Делегирование событий для динамических элементов
+        document.addEventListener('click', function(e) {
+            // Обработка удаления существующих фото
+            if (e.target.closest('.remove-existing-photo-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.remove-existing-photo-btn');
+                const photoCard = btn.closest('.col-6');
+                const photoName = btn.getAttribute('data-photo');
+
+                // Добавляем в массив удаленных
+                if (photoName && !deletedPhotos.includes(photoName)) {
+                    deletedPhotos.push(photoName);
+                    updateDeletedPhotosInput();
+                }
+
+                // Удаляем карточку
                 photoCard.remove();
-            });
+            }
+
+            // Обработка удаления новых фото (preview)
+            if (e.target.closest('.remove-photo-btn')) {
+                const index = e.target.closest('.remove-photo-btn').getAttribute('data-index');
+                const input = document.getElementById('photo-files');
+
+                // Обновляем FileList
+                const newFiles = Array.from(input.files).filter((_, i) => i != index);
+                const dataTransfer = new DataTransfer();
+                newFiles.forEach(file => dataTransfer.items.add(file));
+                input.files = dataTransfer.files;
+
+                // Обновляем превью
+                input.dispatchEvent(new Event('change'));
+            }
         });
+
+        function updateDeletedPhotosInput() {
+            document.querySelectorAll('input[name^="deletedPhotos"]').forEach(el => el.remove());
+
+            deletedPhotos.forEach((photo, index) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `deletedPhotos[${index}]`;
+                input.value = photo;
+                form.appendChild(input);
+            });
+
+            console.log('Deleted photos:', deletedPhotos);
+        }
+
+        if (form.classList.contains('needs-validation')) {
+            form.addEventListener('submit', function(event) {
+                updateDeletedPhotosInput();
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            }, false);
+        }
     });
 </script>
 </body>

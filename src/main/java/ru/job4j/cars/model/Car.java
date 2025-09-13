@@ -34,7 +34,7 @@ public class Car {
     @JoinColumn(name = "color_id", foreignKey = @ForeignKey(name = "COLOR_ID_FK"))
     private Color color;
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "history_owner",
             joinColumns = {
@@ -48,15 +48,4 @@ public class Car {
     @Column(name = "manufacture_year")
     private Integer year;
     private Integer mileage;
-
-    public Car(Brand brand, String model, BodyType bodyType, Engine engine, Color color, List<Owner> owners, Integer year, Integer mileage) {
-        this.brand = brand;
-        this.model = model;
-        this.bodyType = bodyType;
-        this.engine = engine;
-        this.color = color;
-        this.owners = owners;
-        this.year = year;
-        this.mileage = mileage;
-    }
 }

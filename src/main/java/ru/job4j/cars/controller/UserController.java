@@ -10,6 +10,7 @@ import ru.job4j.cars.dto.user.UserCreateDto;
 import ru.job4j.cars.dto.user.UserLoginDto;
 import ru.job4j.cars.dto.user.UserSessionDto;
 import ru.job4j.cars.model.User;
+import ru.job4j.cars.service.notification.NotificationService;
 import ru.job4j.cars.service.user.UserService;
 
 import java.util.Optional;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
+    private  final NotificationService notificationService;
 
     @GetMapping("/login")
     public String getLoginPage() {
@@ -34,6 +36,7 @@ public class UserController {
         }
         var session = request.getSession();
         session.setAttribute("user", found.get());
+        session.setAttribute("notifications", notificationService.findByUserId(found.get()));
         return "redirect:/posts";
     }
 

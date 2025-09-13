@@ -45,6 +45,21 @@
                            aria-label="Search"/>
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
+
+                <!-- Notifications Button -->
+                <div th:if="${not #lists.isEmpty(notifications)}" class="ms-3">
+                    <button class="btn btn-outline-primary position-relative"
+                            type="button"
+                            id="notificationsBtn"
+                            title="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              th:text="${#lists.size(notifications)}">
+                            <span class="visually-hidden">unread notifications</span>
+                        </span>
+                    </button>
+                </div>
+
                 <div class="dropdown ms-3">
                     <div class="user-circle bg-primary text-white rounded-circle d-flex justify-content-center align-items-center"
                          style="width: 40px; height: 40px;"
@@ -78,7 +93,56 @@
             </div>
         </div>
     </nav>
+    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">
+                        <i class="bi bi-bell me-2"></i>Notifications
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div th:if="${#lists.isEmpty(notifications)}" class="p-4 text-center text-muted">
+                        <i class="bi bi-bell-slash fs-1 mb-3"></i>
+                        <p>No notifications</p>
+                    </div>
+                    <div th:if="${not #lists.isEmpty(notifications)}">
+                        <div th:each="notification : ${notifications}"
+                             class="notification-item border-bottom p-3 position-relative"
+                             th:attr="data-notification-id=${notification.id}">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="mb-1" th:text="${notification.message}"></p>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span th:text="${#temporals.format(notification.created, 'dd.MM.yyyy HH:mm')}"></span>
+                                    </small>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="btn btn-sm btn-outline-danger delete-notification-btn"
+                                            th:attr="data-notification-id=${notification.id}"
+                                            title="Delete notification"
+                                            style="display: none;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" th:if="${not #lists.isEmpty(notifications)}">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
+                        <i class="bi bi-check-all me-1"></i>Mark all as read
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
+
+<!-- Notifications Modal -->
+
 <!-- Reusable select fragment -->
 <div th:fragment="select-field(name, label, items, selectedId, required)" class="col-md-4 mb-3">
     <label th:for="${name}" class="form-label" th:text="${label + (required ? '*' : '')}"></label>
@@ -118,5 +182,10 @@
         </div>
     </div>
 </div>
+
+<style>
+
+</style>
+
 </body>
 </html>

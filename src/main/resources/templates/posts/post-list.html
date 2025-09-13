@@ -87,14 +87,14 @@
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <h6 class="mb-0 text-primary" th:text="${'$' + #numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}">$25,000</h6>
                             <div class="btn-group" onclick="event.stopPropagation();">
-                                <a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-sm btn-outline-primary">
+                                <a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-outline-primary">
                                     <i class="bi bi-eye"></i>
                                     <span th:if="${post.userId != user.id}" >View</span>
                                 </a>
-                                <a th:if="${post.userId == user.id}"  th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-sm btn-outline-secondary">
+                                <a th:if="${post.userId == user.id}"  th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-outline-secondary">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <button class="btn btn-outline-danger btn-delete-post"
+                                <button th:if="${post.userId == user.id}" class="btn btn-outline-danger btn-delete-post"
                                         th:data-post-id="${post.id}">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -146,13 +146,13 @@
                                             <small th:unless="${post.updated == null}" class="text-muted" th:text="'Updated: ' + ${#temporals.format(post.updated, 'd MMM yyyy')}">Updated: 16 Jun 2023</small>
                                         </div>
                                         <div class="btn-group" onclick="event.stopPropagation();">
-                                            <a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-sm btn-outline-primary">
+                                            <a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-outline-primary">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
-                                            <a th:if="${post.userId == user.id}" th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-sm btn-outline-secondary">
+                                            <a th:if="${post.userId == user.id}" th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-outline-secondary">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </a>
-                                            <button class="btn btn-outline-danger btn-delete-post"
+                                            <button th:if="${post.userId == user.id}" class="btn btn-outline-danger btn-delete-post"
                                                     th:data-post-id="${post.id}">
                                                 <i class="bi bi-trash"></i> Delete
                                             </button>
@@ -168,6 +168,7 @@
         </div>
     </div>
     <div th:replace="~{fragments :: delete-modal}"></div>
+<!--    <div th:replace="~{fragments :: notifications-modal}"></div>-->
 </div>
 <div th:replace="~{fragments :: footer}"></div>
 

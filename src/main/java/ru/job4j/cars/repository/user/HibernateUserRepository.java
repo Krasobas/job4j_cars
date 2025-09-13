@@ -35,7 +35,12 @@ public class HibernateUserRepository implements UserRepository {
     public Optional<User> findById(Long id) {
         try {
             return crudRepository.optional(
-                    "select distinct u from User u left join fetch u.subscriptions where u.id = :fId",
+                """
+                    select distinct u from User u
+                    left join fetch u.subscriptions
+                    left join fetch u.notifications
+                    where u.id = :fId
+                    """,
                     User.class,
                     Map.of("fId", id)
             );

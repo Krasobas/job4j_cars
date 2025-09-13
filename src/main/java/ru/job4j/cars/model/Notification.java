@@ -7,26 +7,26 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Table(name = "price_history")
 @Data
+@Entity
+@Table(name = "notification")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class PriceHistory {
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private Long before;
-    private Long after;
+    private String message;
     @CreationTimestamp
     private LocalDateTime created;
-    @ToString.Exclude
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    public boolean getDynamic() {
-        return before > after;
-    }
+    @ManyToMany
+    @JoinTable(
+        name = "notification_user",
+        joinColumns = @JoinColumn(name = "notification_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> recipients = new HashSet<>();
 }

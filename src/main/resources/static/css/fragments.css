@@ -1,0 +1,28 @@
+    .notification-item {
+        transition: background-color 0.2s ease;
+    }
+
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .notification-actions {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .notification-item:hover .notification-actions {
+        opacity: 1;
+    }
+
+    .delete-notification-btn {
+        transition: all 0.2s ease;
+    }
+
+    .delete-notification-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }

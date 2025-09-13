@@ -73,6 +73,10 @@ public class CrudRepository {
         return tx(command);
     }
 
+    public <T> boolean runInTransaction(Function<Session, Boolean> command) {
+        return tx(command);
+    }
+
     public <T> T tx(Function<Session, T> command) {
         Session session = sf.openSession();
         Transaction transaction = null;

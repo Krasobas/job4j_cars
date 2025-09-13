@@ -3,6 +3,7 @@ package ru.job4j.cars.mapstruct.post;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import ru.job4j.cars.dto.post.PostCreateDto;
 import ru.job4j.cars.dto.post.PostEditDto;
 import ru.job4j.cars.dto.post.PostListingDto;
@@ -13,6 +14,7 @@ import ru.job4j.cars.model.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Mapper(componentModel = "spring")
@@ -58,6 +60,7 @@ public interface PostMapper {
     @Mapping(source = "post.subscribers", target = "liked")
     @Mapping(source = "post.created", target = "created")
     @Mapping(source = "post.updated", target = "updated")
+    @Mapping(source = "post.history", target = "priceUp", qualifiedByName = "getPriceDynamic")
     PostViewDto getViewDto(Post post, @Context UserSessionDto user);
 
     @Mapping(source = "post.id", target = "id")
@@ -93,11 +96,29 @@ public interface PostMapper {
             return Collections.emptyList();
         }
         return photos.stream()
-                .map(Photo::getPath)
-                .toList();
+            .map(Photo::getPath)
+            .toList();
     }
 
-    default boolean mapCreated(Collection<User> subscribers, @Context UserSessionDto user) {
+    @Named("getPriceDynamic")
+    default boolean getPriceDynamic(Set<PriceHistory> history) {
+        return Objects.nonNull(history) && history.stream().max(Comparator.comparing(PriceHistory::getCreated)).filter(PriceHistory::getDynamic).isPresent();
+    }
+
+    default List<String> mapHistory(Set<PriceHistory> history, @Context UserSessionDto user) {
+        if (history == null || history.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return history.stream()
+            .sorted(Comparator.comparing(PriceHistory::getCreated).reversed())
+            .map(entry -> {
+                String date = mapCreated(entry.getCreated(), user).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+                String price = String.format("$%,d", entry.getBefore());
+                return date + ": " + price;
+            }).toList();
+    }
+
+    default boolean mapSubscriber(Collection<User> subscribers, @Context UserSessionDto user) {
         return Objects.nonNull(subscribers) && subscribers.stream().anyMatch(subscriber -> subscriber.getId().equals(user.getId()));
     }
 

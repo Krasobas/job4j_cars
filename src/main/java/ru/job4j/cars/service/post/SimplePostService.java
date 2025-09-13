@@ -15,11 +15,14 @@ import ru.job4j.cars.service.bodytype.BodyTypeService;
 import ru.job4j.cars.service.brand.BrandService;
 import ru.job4j.cars.service.color.ColorService;
 import ru.job4j.cars.service.engine.EngineService;
+import ru.job4j.cars.service.notification.NotificationService;
 import ru.job4j.cars.service.owner.OwnerService;
 import ru.job4j.cars.service.storage.FileStorageService;
 import ru.job4j.cars.service.user.UserService;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +37,7 @@ public class SimplePostService implements PostService {
     private final ColorService colorService;
     private final OwnerService ownerService;
     private final FileStorageService fileStorageService;
+    private final NotificationService notificationService;
 
     @Override
     public Collection<PostListingDto> findAll(UserSessionDto user) {
@@ -110,7 +114,15 @@ public class SimplePostService implements PostService {
             return false;
         }
         List<Owner> owners = ownerService.persistIfNotExist(post.getOwners());
-        Car car = new Car(brand.get(), post.getModel(), bodyType.get(), engine.get(), color.get(), owners, post.getYear(), post.getMileage());
+        Car car = new Car();
+        car.setBrand(brand.get());
+        car.setModel(post.getModel());
+        car.setBodyType(bodyType.get());
+        car.setEngine(engine.get());
+        car.setColor(color.get());
+        car.setOwners(owners);
+        car.setYear(post.getYear());
+        car.setMileage(post.getMileage());
         Post entity = mapper.getEntityOnCreate(post, createdBy.get(), car);
         fileStorageService.storeFiles(photosFiles, entity);
         return repository.persist(entity);
@@ -118,74 +130,59 @@ public class SimplePostService implements PostService {
 
     @Override
     public boolean update(PostEditDto post, UserSessionDto user, MultipartFile[] photosFiles) {
-        Optional<Post> entity = repository.findById(post.getId());
-        if (entity.isEmpty()) {
-            return false;
-        }
-        Post toUpdate = entity.get();
-        if (!toUpdate.getUser().getId().equals(user.getId())) {
-            return  false;
-        }
-        Car car = toUpdate.getCar();
-        if (!car.getBrand().getId().equals(post.getBrandId())) {
-            Optional<Brand> brand = brandService.findById(post.getBrandId());
-            if (brand.isEmpty()) {
-                return false;
-            }
-            car.setBrand(brand.get());
-        }
-        if (!car.getBodyType().getId().equals(post.getBodyTypeId())) {
-            Optional<BodyType> bodyType = bodyTypeService.findById(post.getBodyTypeId());
-            if (bodyType.isEmpty()) {
-                return false;
-            }
-            car.setBodyType(bodyType.get());
-        }
-        if (!car.getEngine().getId().equals(post.getEngineId())) {
-            Optional<Engine> engine = engineService.findById(post.getEngineId());
-            if (engine.isEmpty()) {
-                return false;
-            }
-            car.setEngine(engine.get());
-        }
-        if (!car.getColor().getId().equals(post.getColorId())) {
-            Optional<Color> color = colorService.findById(post.getColorId());
-            if (color.isEmpty()) {
-                return false;
-            }
-            car.setColor(color.get());
-        }
-        if (!car.getOwners().stream().map(Owner::getName).toList().equals(post.getOwners())) {
-            List<Owner> owners = ownerService.persistIfNotExist(post.getOwners());
-            car.setOwners(owners);
-        }
-        car.setModel(post.getModel());
-        car.setMileage(post.getMileage());
-        car.setYear(post.getYear());
-        toUpdate.setCar(car);
-        toUpdate.setAvailable(post.isAvailable());
-        toUpdate.setTitle(post.getTitle());
-        toUpdate.setDescription(post.getDescription());
-        long oldPrice = toUpdate.getPrice();
-        long newPrice = post.getPrice();
-        if (oldPrice != newPrice) {
-            toUpdate.setPrice(newPrice);
-            PriceHistory priceHistory = new PriceHistory();
-            priceHistory.setPost(toUpdate);
-            priceHistory.setBefore(oldPrice);
-            priceHistory.setAfter(newPrice);
-            /*create price history*/
-        }
+        return repository.findById(post.getId())
+            .filter(existingPost -> existingPost.getUser().getId().equals(user.getId()))
+            .map(existingPost -> {
+                Car car = existingPost.getCar();
+                updateCarProperty(car::setBrand, car.getBrand().getId(), post.getBrandId(), brandService::findById);
+                updateCarProperty(car::setBodyType, car.getBodyType().getId(), post.getBodyTypeId(), bodyTypeService::findById);
+                updateCarProperty(car::setEngine, car.getEngine().getId(), post.getEngineId(), engineService::findById);
+                updateCarProperty(car::setColor, car.getColor().getId(), post.getColorId(), colorService::findById);
+                List<String> currentOwners = car.getOwners().stream().map(Owner::getName).toList();
+                if (!currentOwners.equals(post.getOwners())) {
+                    car.setOwners(ownerService.persistIfNotExist(post.getOwners()));
+                }
+                car.setModel(post.getModel());
+                car.setMileage(post.getMileage());
+                car.setYear(post.getYear());
+                existingPost.setAvailable(post.isAvailable());
+                existingPost.setTitle(post.getTitle());
+                existingPost.setDescription(post.getDescription());
+                updatePriceHistory(existingPost, post);
+                List<Photo> photosToRemove = existingPost.getPhotos().stream()
+                    .filter(photo -> post.getDeletedPhotos().contains(photo.getPath()))
+                    .toList();
+                photosToRemove.forEach(existingPost.getPhotos()::remove);
+                fileStorageService.deleteFiles(post.getDeletedPhotos());
+                fileStorageService.storeFiles(photosFiles, existingPost);
 
-        List<Photo> photosToRemove = toUpdate.getPhotos()
-                .stream()
-                .filter(photo -> post.getDeletedPhotos().contains(photo.getPath()))
-                .toList();
-        photosToRemove.forEach(toUpdate.getPhotos()::remove);
-        fileStorageService.deleteFiles(post.getDeletedPhotos());
-        fileStorageService.storeFiles(photosFiles, toUpdate);
+                return  repository.update(existingPost);
+            })
+            .orElse(false);
+    }
 
-        return repository.update(toUpdate);
+    private void updatePriceHistory(Post existing, PostEditDto update) {
+        long oldPrice = existing.getPrice();
+        if (oldPrice == update.getPrice()) {
+            return;
+        }
+        existing.setPrice(update.getPrice());
+        PriceHistory priceHistory = new PriceHistory();
+        priceHistory.setPost(existing);
+        priceHistory.setBefore(oldPrice);
+        priceHistory.setAfter(update.getPrice());
+        Set<PriceHistory> history = existing.getHistory();
+        if(Objects.isNull(history)) history = new HashSet<>();
+        history.add(priceHistory);
+        existing.setHistory(history);
+        notificationService.persist(existing, oldPrice, update.getPrice());
+
+    }
+
+    private <T> void updateCarProperty(Consumer<T> setter, Long currentId, Long newId, Function<Long, Optional<T>> finder) {
+        if (!currentId.equals(newId)) {
+            finder.apply(newId).ifPresent(setter);
+        }
     }
 
     @Override

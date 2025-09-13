@@ -2,7 +2,6 @@ package ru.job4j.cars.repository.post;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import ru.job4j.cars.model.Brand;
 import ru.job4j.cars.model.Post;
@@ -26,7 +25,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     order by p.created asc, p.updated asc, p.title asc
                     """,
@@ -45,7 +45,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where p.user.id = :fOwnerId
                     order by p.created asc, p.updated asc, p.title asc
@@ -62,11 +63,12 @@ public class HibernatePostRepository implements PostRepository {
     @Override
     public Collection<Post> findBySubscriberId(Long subscriberId) {
         try {
-            return crudRepository.query(
+            var l = crudRepository.query(
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     join p.subscribers subscriber
                     where subscriber.id = :fSubscriberId
@@ -75,6 +77,7 @@ public class HibernatePostRepository implements PostRepository {
                     Post.class,
                     Map.of("fSubscriberId", subscriberId)
             );
+            return l;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -88,7 +91,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where p.available = :fAvailable
                     order by p.created asc, p.updated asc, p.title asc
@@ -109,7 +113,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where lower(p.title) like lower(concat('%', :fTitle, '%'))
                     order by p.created asc, p.updated asc, p.title asc
@@ -132,7 +137,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     join fetch p.photos
                     order by p.created asc, p.updated asc, p.title asc
                     """,
@@ -151,7 +157,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where p.car.brand = :fBrand
                     order by p.created asc, p.updated asc, p.title asc
@@ -172,7 +179,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where p.created >= :fTime
                     order by p.created asc, p.updated asc, p.title asc
@@ -193,7 +201,8 @@ public class HibernatePostRepository implements PostRepository {
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     where p.created <= :fTime
                     order by p.created asc, p.updated asc, p.title asc
@@ -210,18 +219,23 @@ public class HibernatePostRepository implements PostRepository {
     @Override
     public Optional<Post> findById(Long id) {
         try {
-            return crudRepository.optional(
+            var l = crudRepository.optional(
                     """
                     select distinct p from Post p
                     join fetch p.user
-                    join fetch p.car
+                    join fetch p.car c
+                    left join fetch c.owners
                     left join fetch p.photos
                     left join fetch p.subscribers
+                    left join fetch p.history
                     where p.id = :fId
                     """,
                     Post.class,
                     Map.of("fId", id)
             );
+            log.warnf("get by id: %s", l.get().getSubscribers());
+
+            return l;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -244,6 +258,7 @@ public class HibernatePostRepository implements PostRepository {
         try {
             return findById(post.getId())
                     .map(origin -> {
+                        log.warnf("before update: %s", origin.getSubscribers());
                         origin.setTitle(post.getTitle());
                         origin.setDescription(post.getDescription());
                         origin.setPrice(post.getPrice());
@@ -251,6 +266,7 @@ public class HibernatePostRepository implements PostRepository {
                         origin.setCar(post.getCar());
                         origin.setPhotos(post.getPhotos());
                         crudRepository.run(session -> session.merge(origin));
+                        log.warnf("after update: %s", origin.getSubscribers());
                         return origin;
                     }).isPresent();
         } catch (Exception e) {
@@ -273,19 +289,37 @@ public class HibernatePostRepository implements PostRepository {
     @Override
     public boolean updateSubscribers(Long id, User user) {
         try {
-            return findById(id)
-                    .map(origin -> {
-                        if (origin.getSubscribers().contains(user)) {
-                            origin.getSubscribers().remove(user);
-                        } else {
-                            origin.getSubscribers().add(user);
-                        }
-                        crudRepository.run(session -> session.merge(origin));
-                        return origin;
-                    }).isPresent();
+            return crudRepository.runInTransaction(session -> {
+                Optional<Post> optionalPost = session.createQuery(
+                        """
+                        select distinct p from Post p
+                        left join fetch p.subscribers
+                        where p.id = :fId
+                        """,
+                        Post.class
+                    ).setParameter("fId", id)
+                    .uniqueResultOptional();
+
+                if (optionalPost.isPresent()) {
+                    Post post = optionalPost.get();
+
+
+                    if (post.getSubscribers().contains(user)) {
+                        post.getSubscribers().remove(user);
+                    } else {
+                        post.getSubscribers().add(user);
+                    }
+
+                    session.merge(post);
+
+                    return true;
+                }
+                return false;
+            });
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return false;
         }
-        return false;
     }
 }

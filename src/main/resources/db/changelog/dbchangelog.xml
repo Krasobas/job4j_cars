@@ -20,6 +20,7 @@
     <include file="scripts/ddl/011_ddl_create_post_photo_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/ddl/012_ddl_create_price_history_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/ddl/013_ddl_create_post_subscriber_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/ddl/014_ddl_create_notification_table.sql" relativeToChangelogFile="true"/>
 
     <!--    DML     -->
     <include file="scripts/dml/001_dml_insert_into_user_table.sql" relativeToChangelogFile="true"/>
