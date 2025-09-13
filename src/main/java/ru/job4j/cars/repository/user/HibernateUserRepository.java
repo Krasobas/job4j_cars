@@ -120,4 +120,18 @@ public class HibernateUserRepository implements UserRepository {
         }
         return false;
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        try {
+            return crudRepository.optional(
+              "select distinct u from User u left join fetch u.subscriptions left join fetch u.notifications where u.email = :fEmail",
+              User.class,
+              Map.of("fEmail", email)
+            );
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return Optional.empty();
+    }
 }

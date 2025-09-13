@@ -12,7 +12,7 @@ import ru.job4j.cars.dto.user.UserSessionDto;
 
 import java.io.IOException;
 
-@Component
+//@Component
 @Order(2)
 public class SessionFilter extends HttpFilter {
 

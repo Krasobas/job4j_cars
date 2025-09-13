@@ -23,7 +23,6 @@
     <include file="scripts/ddl/014_ddl_create_notification_table.sql" relativeToChangelogFile="true"/>
 
     <!--    DML     -->
-    <include file="scripts/dml/001_dml_insert_into_user_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/dml/002_dml_insert_into_engine_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/dml/003_dml_insert_into_color_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/dml/004_dml_insert_into_country_table.sql" relativeToChangelogFile="true"/>
